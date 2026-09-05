@@ -18,9 +18,8 @@ jobs:
       COMPOSE_DIR: /home/maleesha/cleaning-suite
 
     steps:
-      - name: Login to GHCR (only when PAT configured; public image pulls work anonymously)
-        if: ${{ secrets.GHCR_PAT != '' }}
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Login to GHCR (optional; public image pulls work anonymously)
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin || true
 
       - name: Set image tag
         run: sed -i -E "s|^(IMAGE_TAG=).*|\1sha-${{ github.event.workflow_run.head_sha }}|" $COMPOSE_DIR/.env
