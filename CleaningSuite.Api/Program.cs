@@ -59,6 +59,7 @@ builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 builder.Services.AddScoped<ITenantSession, TenantSessionFactory>();
 builder.Services.AddScoped<ITenantRegistry, TenantRegistry>();
 builder.Services.AddScoped<ITenantProfileRepository, TenantProfileRepository>();
+builder.Services.AddScoped<CleaningSuite.Application.Services.IServiceRepository, CleaningSuite.Infrastructure.Persistence.ServiceRepository>();
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -142,12 +143,21 @@ public class DefaultExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken ct)
     {
-        _logger.LogError(exception, "Unhandled exception for {Path}", context.Request.Path);
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        var (status, title) = exception switch
+        {
+            CleaningSuite.Application.Common.SlugConflictException => (409, "Slug already exists"),
+            CleaningSuite.Application.Common.NotFoundException => (404, "Not found"),
+            _ => (500, "Internal server error"),
+        };
+
+        if (status == 500)
+            _logger.LogError(exception, "Unhandled exception for {Path}", context.Request.Path);
+
+        context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(new ProblemDetails
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Internal server error",
+            Status = status,
+            Title = title,
         }, ct);
         return true;
     }

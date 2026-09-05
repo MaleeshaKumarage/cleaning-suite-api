@@ -32,6 +32,10 @@ public class TenantAdminController : ControllerBase
     }
 
     [HttpPut("pages/{pageKey}")]
-    public Task<IActionResult> UpdatePage(string pageKey) =>
-        Task.FromResult<IActionResult>(StatusCode(StatusCodes.Status501NotImplemented));
+    public async Task<IActionResult> UpdatePage(
+        string pageKey, Dictionary<string, string> values, CancellationToken ct)
+    {
+        await _mediator.Send(new UpdateTenantPageCommand(pageKey, values), ct);
+        return NoContent();
+    }
 }
