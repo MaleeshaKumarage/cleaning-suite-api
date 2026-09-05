@@ -71,6 +71,7 @@ builder.Services.AddScoped<CleaningSuite.Application.Services.IServiceRepository
 builder.Services.AddScoped<CleaningSuite.Application.Bookings.IBookingRepository, CleaningSuite.Infrastructure.Persistence.BookingRepository>();
 builder.Services.AddScoped<CleaningSuite.Application.Bookings.AvailabilityEngine>();
 builder.Services.AddScoped<CleaningSuite.Application.Employees.IEmployeeRepository, CleaningSuite.Infrastructure.Persistence.EmployeeRepository>();
+builder.Services.AddScoped<CleaningSuite.Application.Invoicing.IInvoiceRepository, CleaningSuite.Infrastructure.Persistence.InvoiceRepository>();
 
 builder.Services.AddMediatR(cfg =>
 {
