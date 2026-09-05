@@ -33,6 +33,8 @@ public interface IKeycloakProvisioner
         string lastName,
         string role,
         CancellationToken ct = default);
+
+    Task SetRealmEnabledAsync(string realm, bool enabled, CancellationToken ct = default);
 }
 
 public record InvitedEmployee(string KeycloakUserId, string TemporaryPassword);

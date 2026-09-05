@@ -63,6 +63,7 @@ builder.Services.AddSingleton(sp =>
 });
 builder.Services.AddSingleton<IKeycloakProvisioner, KeycloakProvisioner>();
 
+builder.Services.AddSingleton<ITenantStatusCache, CleaningSuite.Api.Tenancy.TenantStatusCache>();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 builder.Services.AddScoped<ITenantSession, TenantSessionFactory>();
 builder.Services.AddScoped<ITenantRegistry, TenantRegistry>();

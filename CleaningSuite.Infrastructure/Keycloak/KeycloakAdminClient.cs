@@ -125,6 +125,9 @@ public class KeycloakAdminClient
     public Task UpdateUserAsync(string realm, string userId, object user, CancellationToken ct = default) =>
         SendAsync(HttpMethod.Put, $"admin/realms/{realm}/users/{userId}", ct, user);
 
+    public Task SetRealmEnabledAsync(string realm, bool enabled, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Put, $"admin/realms/{realm}", ct, new { enabled });
+
     public async Task<JsonElement> GetRoleAsync(string realm, string roleName, CancellationToken ct = default)
     {
         var response = await SendAsync(HttpMethod.Get, $"admin/realms/{realm}/roles/{roleName}", ct, expectedNotFoundOk: true);

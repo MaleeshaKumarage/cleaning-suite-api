@@ -23,8 +23,7 @@ public class SystemController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Provision(ProvisionTenantCommand command, CancellationToken ct)
     {
-        var realm = HttpContext.Items["Realm"] as string ?? "";
-        if (realm != _provisionerRealm)
+        if (!IsProvisioner())
             return Forbid();
 
         var result = await _mediator.Send(command, ct);
@@ -32,4 +31,37 @@ public class SystemController : ControllerBase
             ? Conflict(new { slug = result.Slug, title = "Tenant already registered" })
             : StatusCode(StatusCodes.Status201Created, result);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken ct)
+    {
+        if (!IsProvisioner())
+            return Forbid();
+
+        var tenants = await _mediator.Send(new ListTenantsQuery(), ct);
+        return Ok(tenants);
+    }
+
+    [HttpPost("{slug}/suspend")]
+    public async Task<IActionResult> Suspend(string slug, CancellationToken ct)
+    {
+        if (!IsProvisioner())
+            return Forbid();
+
+        await _mediator.Send(new SetTenantStatusCommand(slug, Active: false), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{slug}/activate")]
+    public async Task<IActionResult> Activate(string slug, CancellationToken ct)
+    {
+        if (!IsProvisioner())
+            return Forbid();
+
+        await _mediator.Send(new SetTenantStatusCommand(slug, Active: true), ct);
+        return NoContent();
+    }
+
+    private bool IsProvisioner() =>
+        (HttpContext.Items["Realm"] as string ?? "") == _provisionerRealm;
 }

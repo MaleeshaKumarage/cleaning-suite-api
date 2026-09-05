@@ -12,19 +12,20 @@ namespace CleaningSuite.Api.Tenancy;
 /// </summary>
 public class TenantResolutionMiddleware
 {
-    private static readonly MemoryCache RegistryCache = new(new MemoryCacheOptions());
-
     private readonly RequestDelegate _next;
     private readonly string _serverUrl;
+    private readonly ITenantStatusCache _statusCache;
     private readonly ILogger<TenantResolutionMiddleware> _logger;
 
     public TenantResolutionMiddleware(
         RequestDelegate next,
         IConfiguration configuration,
+        ITenantStatusCache statusCache,
         ILogger<TenantResolutionMiddleware> logger)
     {
         _next = next;
         _serverUrl = configuration["Auth:Keycloak:ServerUrl"]!.TrimEnd('/');
+        _statusCache = statusCache;
         _logger = logger;
     }
 
@@ -91,11 +92,12 @@ public class TenantResolutionMiddleware
 
     private async Task<bool> IsActiveAsync(ITenantRegistry registry, string tenantId, CancellationToken ct)
     {
-        if (!RegistryCache.TryGetValue<TenantRegistration>(tenantId, out var registration))
+        var registration = _statusCache.Get(tenantId);
+        if (registration is null)
         {
             registration = await registry.GetBySlugAsync(tenantId, ct);
             if (registration is not null)
-                RegistryCache.Set(tenantId, registration, TimeSpan.FromMinutes(5));
+                _statusCache.Set(tenantId, registration);
         }
 
         return registration?.Status == TenantRegistration.StatusActive;

@@ -70,6 +70,9 @@ public class KeycloakProvisioner : IKeycloakProvisioner
     public Task<bool> RealmExistsAsync(string realm, CancellationToken ct = default) =>
         _admin.RealmExistsAsync(realm, ct);
 
+    public Task SetRealmEnabledAsync(string realm, bool enabled, CancellationToken ct = default) =>
+        _admin.SetRealmEnabledAsync(realm, enabled, ct);
+
     public async Task<InvitedEmployee> InviteEmployeeAsync(
         string realm,
         string email,
