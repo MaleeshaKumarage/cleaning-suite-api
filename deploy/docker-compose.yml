@@ -60,7 +60,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=cleaning;Username=cleaning;Password=${POSTGRES_PASSWORD}
-      Marten__AutoCreateSchemaMode: Create
+      Marten__AutoCreateSchemaMode: CreateOrUpdate
       Auth__Keycloak__ServerUrl: https://auth.readysetsiivous.fi
       Auth__Keycloak__Audiences__0: cleaning-suite-web
       Auth__Keycloak__Audiences__1: cleaning-provisioner

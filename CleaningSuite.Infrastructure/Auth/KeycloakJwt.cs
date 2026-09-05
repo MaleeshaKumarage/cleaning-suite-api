@@ -58,28 +58,41 @@ public static class KeycloakJwt
         return services;
     }
 
-    /// <summary>Issuer must be {server}/realms/{realm} with a realm-shaped last segment.</summary>
+    /// <summary>
+    /// Issuer must be {server}/realms/{realm} with a realm-shaped last segment.
+    /// Scheme http/https both accepted: behind a TLS-terminating tunnel Keycloak
+    /// may advertise the http issuer.
+    /// </summary>
     private static string ValidateIssuer(string issuer, string serverUrl)
     {
-        var prefix = $"{serverUrl}/realms/";
-        if (!issuer.StartsWith(prefix, StringComparison.Ordinal))
-            throw new SecurityTokenInvalidIssuerException(
-                $"Issuer {issuer} is outside configured Keycloak server {serverUrl}");
-
-        var realm = issuer[prefix.Length..];
+        var realm = RealmFromIssuer(issuer, serverUrl);
         if (!RealmFormat.IsMatch(realm))
             throw new SecurityTokenInvalidIssuerException($"Invalid realm name in issuer: {realm}");
 
         return issuer;
     }
 
-    /// <summary>Extracts the realm from a token's issuer claim.</summary>
+    /// <summary>Extracts the realm from a token's issuer claim, tolerating http/https scheme difference.</summary>
     public static string RealmFromIssuer(string issuer, string serverUrl)
     {
-        var prefix = $"{serverUrl}/realms/";
-        if (!issuer.StartsWith(prefix, StringComparison.Ordinal))
-            throw new SecurityTokenInvalidIssuerException($"Issuer {issuer} is outside configured Keycloak server");
-        return issuer[prefix.Length..];
+        var serverWithoutScheme = StripScheme(serverUrl);
+        var issuerWithoutScheme = StripScheme(issuer);
+
+        var prefix = $"{serverWithoutScheme}/realms/";
+        if (!issuerWithoutScheme.StartsWith(prefix, StringComparison.Ordinal))
+            throw new SecurityTokenInvalidIssuerException(
+                $"Issuer {issuer} is outside configured Keycloak server {serverUrl}");
+
+        return issuerWithoutScheme[prefix.Length..];
+    }
+
+    private static string StripScheme(string url)
+    {
+        if (url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return url["https://".Length..];
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+            return url["http://".Length..];
+        return url;
     }
 }
 
