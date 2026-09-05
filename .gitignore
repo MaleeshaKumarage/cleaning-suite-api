@@ -8,4 +8,4 @@ deploy/.env
 out/
 TestResults/
 *.coverage
-verify-phase1.sh
+verify-phase*.sh

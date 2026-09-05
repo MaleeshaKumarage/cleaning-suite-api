@@ -56,6 +56,27 @@ public class BookingsAdminController : ControllerBase
         await _mediator.Send(new CompleteBookingCommand(id, body?.Note), ct);
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/assign")]
+    public async Task<IActionResult> Assign(
+        Guid id,
+        [FromBody] AssignBody body,
+        CancellationToken ct)
+    {
+        await _mediator.Send(
+            new CleaningSuite.Application.Employees.Commands.AssignBookingCommand(id, body.EmployeeId), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/unassign")]
+    public async Task<IActionResult> Unassign(Guid id, CancellationToken ct)
+    {
+        await _mediator.Send(
+            new CleaningSuite.Application.Employees.Commands.UnassignBookingCommand(id), ct);
+        return NoContent();
+    }
 }
+
+public record AssignBody(Guid EmployeeId);
 
 public record BookingNote(string? Note);

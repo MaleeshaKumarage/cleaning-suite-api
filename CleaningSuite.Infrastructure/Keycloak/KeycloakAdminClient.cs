@@ -107,6 +107,24 @@ public class KeycloakAdminClient
     public Task<string> CreateUserAsync(string realm, object user, CancellationToken ct = default) =>
         SendForLocationAsync(HttpMethod.Post, $"admin/realms/{realm}/users", ct, user);
 
+    public async Task<string?> GetUserIdByUsernameAsync(string realm, string username, CancellationToken ct = default)
+    {
+        var response = await SendAsync(
+            HttpMethod.Get,
+            $"admin/realms/{realm}/users?username={Uri.EscapeDataString(username)}&exact=true",
+            ct, expectedNotFoundOk: true);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var users = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
+        return users.ValueKind == JsonValueKind.Array && users.GetArrayLength() > 0
+            ? users[0].GetProperty("id").GetString()
+            : null;
+    }
+
+    public Task UpdateUserAsync(string realm, string userId, object user, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Put, $"admin/realms/{realm}/users/{userId}", ct, user);
+
     public async Task<JsonElement> GetRoleAsync(string realm, string roleName, CancellationToken ct = default)
     {
         var response = await SendAsync(HttpMethod.Get, $"admin/realms/{realm}/roles/{roleName}", ct, expectedNotFoundOk: true);

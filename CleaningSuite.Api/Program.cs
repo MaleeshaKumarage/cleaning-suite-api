@@ -15,8 +15,16 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
-// Load .env from repo root before config builds (dev convenience, DotNetEnv is a no-op if absent).
-DotNetEnv.Env.Load();
+// Load .env before config builds. dotnet run executes with the project dir as cwd,
+// so look in the project dir first, then the repo root. No-op if absent.
+foreach (var envPath in new[] { ".env", Path.Combine("..", ".env") })
+{
+    if (File.Exists(envPath))
+    {
+        DotNetEnv.Env.Load(envPath);
+        break;
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +70,7 @@ builder.Services.AddScoped<ITenantProfileRepository, TenantProfileRepository>();
 builder.Services.AddScoped<CleaningSuite.Application.Services.IServiceRepository, CleaningSuite.Infrastructure.Persistence.ServiceRepository>();
 builder.Services.AddScoped<CleaningSuite.Application.Bookings.IBookingRepository, CleaningSuite.Infrastructure.Persistence.BookingRepository>();
 builder.Services.AddScoped<CleaningSuite.Application.Bookings.AvailabilityEngine>();
+builder.Services.AddScoped<CleaningSuite.Application.Employees.IEmployeeRepository, CleaningSuite.Infrastructure.Persistence.EmployeeRepository>();
 
 builder.Services.AddMediatR(cfg =>
 {
