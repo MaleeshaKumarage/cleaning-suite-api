@@ -60,6 +60,8 @@ builder.Services.AddScoped<ITenantSession, TenantSessionFactory>();
 builder.Services.AddScoped<ITenantRegistry, TenantRegistry>();
 builder.Services.AddScoped<ITenantProfileRepository, TenantProfileRepository>();
 builder.Services.AddScoped<CleaningSuite.Application.Services.IServiceRepository, CleaningSuite.Infrastructure.Persistence.ServiceRepository>();
+builder.Services.AddScoped<CleaningSuite.Application.Bookings.IBookingRepository, CleaningSuite.Infrastructure.Persistence.BookingRepository>();
+builder.Services.AddScoped<CleaningSuite.Application.Bookings.AvailabilityEngine>();
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -147,6 +149,8 @@ public class DefaultExceptionHandler : IExceptionHandler
         {
             CleaningSuite.Application.Common.SlugConflictException => (409, "Slug already exists"),
             CleaningSuite.Application.Common.NotFoundException => (404, "Not found"),
+            CleaningSuite.Application.Bookings.SlotConflictException => (409, "Slot conflict"),
+            UnauthorizedAccessException => (403, "Forbidden"),
             _ => (500, "Internal server error"),
         };
 

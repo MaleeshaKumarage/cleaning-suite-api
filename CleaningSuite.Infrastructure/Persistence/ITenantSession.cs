@@ -13,6 +13,9 @@ public interface ITenantSession
 {
     /// <summary>Session bound to the current request's tenant partition.</summary>
     IDocumentSession Session { get; }
+
+    /// <summary>Current request tenant id.</summary>
+    string TenantId { get; }
 }
 
 public class TenantSessionFactory : ITenantSession, IDisposable
@@ -30,6 +33,8 @@ public class TenantSessionFactory : ITenantSession, IDisposable
     // DirtyTrackedSession hydrates IVersioned versions on load and detects
     // mutations, so load-mutate-save in one request does a proper optimistic update.
     public IDocumentSession Session => _session ??= _store.DirtyTrackedSession(_context.TenantId);
+
+    public string TenantId => _context.TenantId;
 
     public void Dispose() => _session?.Dispose();
 }
