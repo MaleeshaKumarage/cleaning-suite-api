@@ -111,6 +111,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseCors("SiteOrigins");
+app.UseMiddleware<CleaningSuite.Api.Middleware.PublicRateLimitMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>();
 app.UseAuthorization();
