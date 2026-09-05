@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: cleaning
       KC_DB_PASSWORD: ${KC_DB_PASSWORD:?}
     ports:
-      - "127.0.0.1:5434:5432"
+      - "127.0.0.1:5435:5432"
     volumes:
       - cleaning_pgdata:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d:ro
@@ -40,7 +40,7 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_JAVA_OPTS: "-Xms256m -Xmx768m -XX:MetaspaceSize=96m"
     ports:
-      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:8082:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,10 +62,14 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=cleaning;Username=cleaning;Password=${POSTGRES_PASSWORD}
       Marten__AutoCreateSchemaMode: Create
       Auth__Keycloak__ServerUrl: https://auth.readysetsiivous.fi
-      Auth__Keycloak__Audience: cleaning-suite-api
+      Auth__Keycloak__Audiences__0: cleaning-suite-web
+      Auth__Keycloak__Audiences__1: cleaning-provisioner
+      Auth__Keycloak__Audiences__2: account
       Auth__Keycloak__ProvisionerRealm: master
       Auth__Keycloak__ProvisionerClientId: cleaning-provisioner
-      Auth__Keycloak__ProvisionerClientSecret: ${PROVISIONER_CLIENT_SECRET:?}
+      Auth__Keycloak__ProvisionerClientSecret: ${PROVISIONER_CLIENT_SECRET:-}
+      Auth__Keycloak__AdminUser: ${KEYCLOAK_ADMIN_USER}
+      Auth__Keycloak__AdminPassword: ${KEYCLOAK_ADMIN_PASSWORD}
       Cors__AllowedOrigins__0: https://readysetsiivous.fi
     ports:
       - "127.0.0.1:8090:8080"
